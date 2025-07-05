@@ -3,8 +3,12 @@ name: Run Selenium Tests
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '**/*.xlsx'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '**/*.xlsx'
 
 jobs:
   test:
