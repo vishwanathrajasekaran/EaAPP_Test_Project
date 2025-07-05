@@ -16,20 +16,19 @@ namespace EaAPP_Test_Project.Pages
             wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
 
-        private IWebElement EmployeeListLink => wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Employee List")));
-        private IWebElement CreateNewButton => wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Create New")));
-        private IWebElement SearchField => wait.Until(ExpectedConditions.ElementIsVisible(By.Name("searchTerm")));
-        private IWebElement DeleteLink => wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Delete")));
+        // Removed cached IWebElement properties
 
         public void GoToEmployeeList()
         {
-            EmployeeListLink.Click();
+            var employeeListLink = wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Employee List")));
+            employeeListLink.Click();
         }
 
         public void GoToCreateEmployeeForm()
         {
             GoToEmployeeList();
-            CreateNewButton.Click();
+            var createNewButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Create New")));
+            createNewButton.Click();
         }
 
         public void FillEmployeeForm(string name, string salary, string duration, string grade, string email)
@@ -50,28 +49,29 @@ namespace EaAPP_Test_Project.Pages
             durationWorkedField.Clear();
             durationWorkedField.SendKeys(duration);
 
-            // Select grade option
             var option = gradeDropdown.FindElement(By.XPath($"//option[. = '{grade}']"));
             option.Click();
 
             emailField.Clear();
             emailField.SendKeys(email);
 
-            // Scroll into view to avoid click interception
             ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", submitButton);
             submitButton.Click();
         }
 
         public void SearchEmployee(string name)
         {
-            SearchField.Clear();
-            SearchField.SendKeys(name);
-            SearchField.SendKeys(Keys.Enter);
+            var searchField = wait.Until(ExpectedConditions.ElementIsVisible(By.Name("searchTerm")));
+            searchField.Clear();
+            searchField.SendKeys(name);
+            searchField.SendKeys(Keys.Enter);
         }
 
         public void DeleteEmployee()
         {
-            DeleteLink.Click();
+            var deleteLink = wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Delete")));
+            deleteLink.Click();
+
             var confirmButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector(".btn")));
             confirmButton.Click();
         }

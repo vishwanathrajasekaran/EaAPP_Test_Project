@@ -1,9 +1,10 @@
-﻿using NUnit.Framework;
+﻿using EaAPP_Test_Project.Pages;
+using EaAPP_Test_Project.TestDatas;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
-using EaAPP_Test_Project.Pages;
-using EaAPP_Test_Project.TestDatas;
+using SeleniumExtras.WaitHelpers;
 using System;
 using System.Collections.ObjectModel;
 
@@ -43,18 +44,13 @@ namespace EaAPP_Test_Project.Tests
         [Test]
         public void DeleteCreatedUser()
         {
-            // 1. Login
             loginPage.GoToLoginPage();
             loginPage.Login(TestData.Username, TestData.Password);
 
-            // 2. Navigate to Employee List
             employeePage.GoToEmployeeList();
-
-            // 3. Search for the employee by name
             employeePage.SearchEmployee(TestData.EmployeeName);
 
-            // 4. Find all matching Delete links for the search results
-            ReadOnlyCollection<IWebElement> deleteLinks = driver.FindElements(By.LinkText("Delete"));
+            var deleteLinks = driver.FindElements(By.LinkText("Delete"));
 
             if (deleteLinks.Count == 0)
             {
@@ -62,24 +58,29 @@ namespace EaAPP_Test_Project.Tests
             }
             else
             {
-                // Loop and delete all matching employees one by one
-                while (deleteLinks.Count > 0)
+                while (true)
                 {
-                    deleteLinks[0].Click();  // Click Delete for first item
-                    wait.Until(d => d.FindElement(By.CssSelector(".btn"))).Click(); // Confirm delete button
-
-                    // Wait until redirected back to employee list
-                    wait.Until(d => d.FindElement(By.Name("searchTerm")));
-
-                    // Search again to refresh list
-                    employeePage.SearchEmployee(TestData.EmployeeName);
-
-                    // Refresh delete links collection
                     deleteLinks = driver.FindElements(By.LinkText("Delete"));
+                    if (deleteLinks.Count == 0)
+                        break;
+
+                    deleteLinks[0].Click();
+                    var confirmButton = new WebDriverWait(driver, TimeSpan.FromSeconds(10))
+                                            .Until(ExpectedConditions.ElementToBeClickable(By.CssSelector(".btn")));
+                    confirmButton.Click();
+
+                    // Wait for redirect back to employee list and search box
+                    new WebDriverWait(driver, TimeSpan.FromSeconds(10))
+                        .Until(ExpectedConditions.ElementIsVisible(By.Name("searchTerm")));
+
+                    // Refresh search to update list after delete
+                    employeePage.SearchEmployee(TestData.EmployeeName);
                 }
 
                 Console.WriteLine($"All employees with name '{TestData.EmployeeName}' deleted.");
             }
         }
+
     }
 }
+
