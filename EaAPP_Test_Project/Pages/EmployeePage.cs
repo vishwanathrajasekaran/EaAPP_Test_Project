@@ -16,41 +16,54 @@ namespace EaAPP_Test_Project.Pages
             wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
 
-        private IWebElement EmployeeListLink => driver.FindElement(By.LinkText("Employee List"));
-        private IWebElement CreateNewButton => driver.FindElement(By.LinkText("Create New"));
-        private IWebElement NameField => driver.FindElement(By.Id("Name"));
-        private IWebElement SalaryField => driver.FindElement(By.Id("Salary"));
-        private IWebElement DurationWorkedField => driver.FindElement(By.Id("DurationWorked"));
-        private IWebElement GradeDropdown => driver.FindElement(By.Id("Grade"));
-        private IWebElement EmailField => driver.FindElement(By.Id("Email"));
-        private IWebElement SubmitButton => driver.FindElement(By.CssSelector(".btn"));
-        private IWebElement SearchField => driver.FindElement(By.Name("searchTerm"));
-        private IWebElement DeleteLink => driver.FindElement(By.LinkText("Delete"));
+        private IWebElement EmployeeListLink => wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Employee List")));
+        private IWebElement CreateNewButton => wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Create New")));
+        private IWebElement SearchField => wait.Until(ExpectedConditions.ElementIsVisible(By.Name("searchTerm")));
+        private IWebElement DeleteLink => wait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText("Delete")));
 
         public void GoToEmployeeList()
         {
-            wait.Until(ExpectedConditions.ElementToBeClickable(EmployeeListLink)).Click();
+            EmployeeListLink.Click();
         }
 
         public void GoToCreateEmployeeForm()
         {
             GoToEmployeeList();
-            wait.Until(ExpectedConditions.ElementToBeClickable(CreateNewButton)).Click();
+            CreateNewButton.Click();
         }
 
         public void FillEmployeeForm(string name, string salary, string duration, string grade, string email)
         {
-            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("Name"))).SendKeys(name);
-            SalaryField.SendKeys(salary);
-            DurationWorkedField.SendKeys(duration);
-            GradeDropdown.FindElement(By.XPath($"//option[. = '{grade}']")).Click();
-            EmailField.SendKeys(email);
-            SubmitButton.Click();
+            var nameField = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("Name")));
+            var salaryField = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("Salary")));
+            var durationWorkedField = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("DurationWorked")));
+            var gradeDropdown = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("Grade")));
+            var emailField = wait.Until(ExpectedConditions.ElementIsVisible(By.Id("Email")));
+            var submitButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector(".btn")));
+
+            nameField.Clear();
+            nameField.SendKeys(name);
+
+            salaryField.Clear();
+            salaryField.SendKeys(salary);
+
+            durationWorkedField.Clear();
+            durationWorkedField.SendKeys(duration);
+
+            // Select grade option
+            var option = gradeDropdown.FindElement(By.XPath($"//option[. = '{grade}']"));
+            option.Click();
+
+            emailField.Clear();
+            emailField.SendKeys(email);
+
+            // Scroll into view to avoid click interception
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", submitButton);
+            submitButton.Click();
         }
 
         public void SearchEmployee(string name)
         {
-            wait.Until(ExpectedConditions.ElementIsVisible(By.Name("searchTerm")));
             SearchField.Clear();
             SearchField.SendKeys(name);
             SearchField.SendKeys(Keys.Enter);
@@ -58,8 +71,9 @@ namespace EaAPP_Test_Project.Pages
 
         public void DeleteEmployee()
         {
-            wait.Until(ExpectedConditions.ElementToBeClickable(DeleteLink)).Click();
-            wait.Until(ExpectedConditions.ElementToBeClickable(SubmitButton)).Click();
+            DeleteLink.Click();
+            var confirmButton = wait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector(".btn")));
+            confirmButton.Click();
         }
     }
 }
