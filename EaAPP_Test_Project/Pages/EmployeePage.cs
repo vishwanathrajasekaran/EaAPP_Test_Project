@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using System;
+using System.Linq;
 
 namespace EaAPP_Test_Project.Pages
 {
@@ -10,7 +11,7 @@ namespace EaAPP_Test_Project.Pages
         private readonly IWebDriver driver;
         private readonly WebDriverWait wait;
 
-        // Store locators, not IWebElement references
+        // Store By locators
         private readonly By employeeListLinkLocator = By.LinkText("Employee List");
         private readonly By createNewButtonLocator = By.LinkText("Create New");
         private readonly By nameFieldLocator = By.Id("Name");
@@ -30,13 +31,28 @@ namespace EaAPP_Test_Project.Pages
 
         public void GoToEmployeeList()
         {
-            wait.Until(ExpectedConditions.ElementToBeClickable(employeeListLinkLocator)).Click();
+            try
+            {
+                wait.Until(ExpectedConditions.ElementToBeClickable(employeeListLinkLocator)).Click();
+            }
+            catch (StaleElementReferenceException)
+            {
+                // Retry if stale element
+                driver.FindElement(employeeListLinkLocator).Click();
+            }
         }
 
         public void GoToCreateEmployeeForm()
         {
             GoToEmployeeList();
-            wait.Until(ExpectedConditions.ElementToBeClickable(createNewButtonLocator)).Click();
+            try
+            {
+                wait.Until(ExpectedConditions.ElementToBeClickable(createNewButtonLocator)).Click();
+            }
+            catch (StaleElementReferenceException)
+            {
+                driver.FindElement(createNewButtonLocator).Click();
+            }
         }
 
         public void FillEmployeeForm(string name, string salary, string duration, string grade, string email)
@@ -49,7 +65,19 @@ namespace EaAPP_Test_Project.Pages
             gradeDropdown.FindElement(By.XPath($".//option[. = '{grade}']")).Click();
 
             driver.FindElement(emailFieldLocator).SendKeys(email);
-            driver.FindElement(submitButtonLocator).Click();
+
+            // Wait for and try clicking Submit
+            var submitBtn = wait.Until(ExpectedConditions.ElementToBeClickable(submitButtonLocator));
+            try
+            {
+                submitBtn.Click();
+            }
+            catch (ElementClickInterceptedException)
+            {
+                // Use JS click as fallback
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                js.ExecuteScript("arguments[0].click();", submitBtn);
+            }
         }
 
         public void SearchEmployee(string name)
@@ -62,8 +90,25 @@ namespace EaAPP_Test_Project.Pages
 
         public void DeleteEmployee()
         {
-            wait.Until(ExpectedConditions.ElementToBeClickable(deleteLinkLocator)).Click();
-            wait.Until(ExpectedConditions.ElementToBeClickable(submitButtonLocator)).Click();
+            try
+            {
+                wait.Until(ExpectedConditions.ElementToBeClickable(deleteLinkLocator)).Click();
+            }
+            catch (StaleElementReferenceException)
+            {
+                driver.FindElement(deleteLinkLocator).Click();
+            }
+
+            try
+            {
+                wait.Until(ExpectedConditions.ElementToBeClickable(submitButtonLocator)).Click();
+            }
+            catch (ElementClickInterceptedException)
+            {
+                IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                var submitBtn = driver.FindElement(submitButtonLocator);
+                js.ExecuteScript("arguments[0].click();", submitBtn);
+            }
         }
     }
 }
