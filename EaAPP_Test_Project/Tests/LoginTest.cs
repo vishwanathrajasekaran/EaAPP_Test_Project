@@ -14,7 +14,11 @@ namespace EaAPP_Test_Project.Tests  // ensure this matches your folder structure
         [SetUp]
         public void SetUp()
         {
-            driver = new ChromeDriver();
+            var options = new ChromeOptions();
+            options.AddArgument("--headless");
+            options.AddArgument("--disable-gpu");
+            options.AddArgument("--window-size=1920,1080");
+            driver = new ChromeDriver(options);
         }
 
         [TearDown]

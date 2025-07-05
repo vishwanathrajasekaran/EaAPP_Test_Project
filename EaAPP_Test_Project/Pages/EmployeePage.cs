@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System;
 
 namespace EaAPP_Test_Project.Pages
@@ -15,43 +16,50 @@ namespace EaAPP_Test_Project.Pages
             wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
 
+        private IWebElement EmployeeListLink => driver.FindElement(By.LinkText("Employee List"));
+        private IWebElement CreateNewButton => driver.FindElement(By.LinkText("Create New"));
+        private IWebElement NameField => driver.FindElement(By.Id("Name"));
+        private IWebElement SalaryField => driver.FindElement(By.Id("Salary"));
+        private IWebElement DurationWorkedField => driver.FindElement(By.Id("DurationWorked"));
+        private IWebElement GradeDropdown => driver.FindElement(By.Id("Grade"));
+        private IWebElement EmailField => driver.FindElement(By.Id("Email"));
+        private IWebElement SubmitButton => driver.FindElement(By.CssSelector(".btn"));
+        private IWebElement SearchField => driver.FindElement(By.Name("searchTerm"));
+        private IWebElement DeleteLink => driver.FindElement(By.LinkText("Delete"));
+
         public void GoToEmployeeList()
         {
-            wait.Until(d => d.FindElement(By.LinkText("Employee List"))).Click();
+            wait.Until(ExpectedConditions.ElementToBeClickable(EmployeeListLink)).Click();
         }
 
         public void GoToCreateEmployeeForm()
         {
             GoToEmployeeList();
-            wait.Until(d => d.FindElement(By.LinkText("Create New"))).Click();
+            wait.Until(ExpectedConditions.ElementToBeClickable(CreateNewButton)).Click();
         }
 
         public void FillEmployeeForm(string name, string salary, string duration, string grade, string email)
         {
-            wait.Until(d => d.FindElement(By.Id("Name"))).SendKeys(name);
-            wait.Until(d => d.FindElement(By.Id("Salary"))).SendKeys(salary);
-            wait.Until(d => d.FindElement(By.Id("DurationWorked"))).SendKeys(duration);
-
-            var gradeDropdown = wait.Until(d => d.FindElement(By.Id("Grade")));
-            gradeDropdown.FindElement(By.XPath($"//option[. = '{grade}']")).Click();
-
-            wait.Until(d => d.FindElement(By.Id("Email"))).SendKeys(email);
-
-            wait.Until(d => d.FindElement(By.CssSelector(".btn"))).Click();
+            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("Name"))).SendKeys(name);
+            SalaryField.SendKeys(salary);
+            DurationWorkedField.SendKeys(duration);
+            GradeDropdown.FindElement(By.XPath($"//option[. = '{grade}']")).Click();
+            EmailField.SendKeys(email);
+            SubmitButton.Click();
         }
 
         public void SearchEmployee(string name)
         {
-            var searchField = wait.Until(d => d.FindElement(By.Name("searchTerm")));
-            searchField.Clear();
-            searchField.SendKeys(name);
-            searchField.SendKeys(Keys.Enter);
+            wait.Until(ExpectedConditions.ElementIsVisible(By.Name("searchTerm")));
+            SearchField.Clear();
+            SearchField.SendKeys(name);
+            SearchField.SendKeys(Keys.Enter);
         }
 
         public void DeleteEmployee()
         {
-            wait.Until(d => d.FindElement(By.LinkText("Delete"))).Click();
-            wait.Until(d => d.FindElement(By.CssSelector(".btn"))).Click();
+            wait.Until(ExpectedConditions.ElementToBeClickable(DeleteLink)).Click();
+            wait.Until(ExpectedConditions.ElementToBeClickable(SubmitButton)).Click();
         }
     }
 }

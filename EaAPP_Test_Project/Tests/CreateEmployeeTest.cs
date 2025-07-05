@@ -14,9 +14,11 @@ namespace EaAPP_Test_Project.Tests
         [SetUp]
         public void SetUp()
         {
-            driver = new ChromeDriver();
-            driver.Navigate().GoToUrl("http://eaapp.somee.com/");
-            driver.Manage().Window.Maximize();
+            var options = new ChromeOptions();
+            options.AddArgument("--headless");
+            options.AddArgument("--disable-gpu");
+            options.AddArgument("--window-size=1920,1080");
+            driver = new ChromeDriver(options);
         }
 
         [TearDown]
