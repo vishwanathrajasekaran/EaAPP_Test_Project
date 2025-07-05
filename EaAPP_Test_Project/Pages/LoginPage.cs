@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System;
 
 namespace EaAPP_Test_Project.Pages
@@ -15,46 +16,38 @@ namespace EaAPP_Test_Project.Pages
             wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
 
-        public void GoToLoginPage()
-        {
-            wait.Until(d => d.FindElement(By.Id("loginLink"))).Click();
-        }
-
-        public void Login(string username, string password)
-        {
-            wait.Until(d => d.FindElement(By.Id("UserName"))).Clear();
-            driver.FindElement(By.Id("UserName")).SendKeys(username);
-
-            driver.FindElement(By.Id("Password")).Clear();
-            driver.FindElement(By.Id("Password")).SendKeys(password);
-
-            driver.FindElement(By.Id("RememberMe")).Click();
-
-            driver.FindElement(By.Id("loginIn")).Click();
-        }
-
-        public void LoginLinkClick()
-        {
-            driver.FindElement(By.Id("loginLink")).Click();
-        }
-
-
+        // ✅ Method: Navigate to home page
         public void NavigateToHomePage()
         {
             driver.Navigate().GoToUrl("http://eaapp.somee.com/");
         }
 
-
-        public void PerformLogin(string username, string password)
+        // ✅ Method: Click login link
+        public void ClickLoginLink()
         {
-            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            wait.Until(driver => driver.FindElement(By.Id("UserName")).Displayed);
-
-            driver.FindElement(By.Id("UserName")).SendKeys(username);
-            driver.FindElement(By.Id("Password")).SendKeys(password);
-            driver.FindElement(By.Id("RememberMe")).Click();
-            driver.FindElement(By.Id("loginIn")).Click();
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("loginLink"))).Click();
         }
 
+        // ✅ Method: Perform login
+        public void PerformLogin(string username, string password)
+        {
+            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("UserName"))).SendKeys(username);
+            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("Password"))).SendKeys(password);
+            wait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector("input[type='submit']"))).Click();
+        }
+
+        // ✅ Optional combined method
+        public void GoToLoginPage()
+        {
+            NavigateToHomePage();
+            ClickLoginLink();
+        }
+
+        // ✅ Optional combined login method
+        public void Login(string username, string password)
+        {
+            GoToLoginPage();
+            PerformLogin(username, password);
+        }
     }
 }
