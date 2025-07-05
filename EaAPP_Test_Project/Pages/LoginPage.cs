@@ -33,19 +33,28 @@ namespace EaAPP_Test_Project.Pages
             driver.FindElement(By.Id("loginIn")).Click();
         }
 
-        internal void LoginLinkClick()
+        public void LoginLinkClick()
         {
-            throw new NotImplementedException();
+            driver.FindElement(By.Id("loginLink")).Click();
         }
 
-        internal void NavigateToHomePage()
+
+        public void NavigateToHomePage()
         {
-            throw new NotImplementedException();
+            driver.Navigate().GoToUrl("http://eaapp.somee.com/");
         }
 
-        internal void PerformLogin(string username, string password)
+
+        public void PerformLogin(string username, string password)
         {
-            throw new NotImplementedException();
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait.Until(driver => driver.FindElement(By.Id("UserName")).Displayed);
+
+            driver.FindElement(By.Id("UserName")).SendKeys(username);
+            driver.FindElement(By.Id("Password")).SendKeys(password);
+            driver.FindElement(By.Id("RememberMe")).Click();
+            driver.FindElement(By.Id("loginIn")).Click();
         }
+
     }
 }
